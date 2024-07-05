@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController= navController, startDestination = Screen.Search.route)
                 {
                     composable(route= Screen.Search.route) {
-                        SearchModule(definitionList=definitionList,navController = navController)
+                        SearchModule(navController = navController)
                     }
                     composable(route=Screen.Bookmarks.route){
                         BookmarksModule(definitionList=definitionList,navController = navController)

@@ -14,14 +14,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.slovoved.R
 import com.example.slovoved.navigation.Screen
+import com.example.slovoved.presentation.search_module.SearchViewModel
 import com.example.slovoved.presentation.universal_components.CustomTextField
 import com.example.slovoved.presentation.universal_components.DefinitionCard
 
@@ -56,20 +60,23 @@ fun SearchModulePreview() {
         "Android Jetpack — это набор библиотек и инструментов, предоставляемых Google, которые помогают разработчикам создавать более качественные, надежные и современные приложения Android. Он включает в себя такие библиотеки, как Lifecycle, Navigation, Room и другие.",
         "Kotlin — это статически типизированный язык программирования, разработанный компанией JetBrains. Он предоставляет более высокую производительность, более безопасный код и более удобный синтаксис, чем Java. Kotlin поддерживается как основной язык для разработки приложений под Android."
     )
-    SearchModule(definitionList = definitionList)
+    SearchModule()
 }
 
 
 
 
 @Composable
-fun SearchModule(definitionList: Array<String>,navController: NavHostController?=null) {
+fun SearchModule(searchViewModel: SearchViewModel= viewModel(), navController: NavHostController?=null) {
+
+    val searchState by searchViewModel.searchState.collectAsState()
+
     Scaffold(bottomBar = { SearchBar(navController) },
         content = {padding->
         LazyColumn(contentPadding = PaddingValues(16.dp),
             modifier = Modifier.padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(definitionList) { definition ->
+            items(searchState.definitionList) { definition ->
                 DefinitionCard(definition = definition, bookmarkIsActive = false, navController = navController)
                 }
             }
@@ -80,10 +87,14 @@ fun SearchModule(definitionList: Array<String>,navController: NavHostController?
 
 @Composable
 fun SearchBar(navController: NavHostController?=null){
-    Row(modifier = Modifier.fillMaxWidth().height(80.dp).background(color = Color(0xFF4B4B4B))) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(80.dp)
+        .background(color = Color(0xFF4B4B4B))) {
         Image(painter = painterResource(id = R.drawable.active_bookmark),
             contentDescription = "go to bookmarks",
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
                 .size(32.dp)
                 .clickable(onClick = { navController?.navigate(Screen.Bookmarks.route) })
         )
