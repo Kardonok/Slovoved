@@ -48,7 +48,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchBarPreview()
 {
-   // SearchBar()
+   //SearchBar()
 }
 
 @Preview(showBackground = true)
@@ -138,10 +138,7 @@ fun LoadingScreen(searchState: Search, modifier: Modifier = Modifier) {
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Image(
-            imageVector = Icons.Default.Clear,
-            contentDescription = "Загрузка",
-        )
+        Text(text = "Определений не найдено", style = textStyle)
     }
 }
 
@@ -166,6 +163,6 @@ fun SearchBar(searchState: Search,searchViewModel: SearchViewModel,navController
                 .size(32.dp)
                 .clickable(onClick = { navController?.navigate(Screen.Bookmarks.route) })
         )
-        CustomTextField(title = R.string.search, changeSearchingWord = searchViewModel::changeSearchingWord, word = searchState.word)
+        CustomTextField(title = R.string.search, changeSearchingWord = searchViewModel::changeQueryWord, word = searchState.word)
     }
 }
