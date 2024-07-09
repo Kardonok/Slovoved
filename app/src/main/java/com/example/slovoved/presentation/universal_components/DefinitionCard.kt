@@ -26,20 +26,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.example.slovoved.R
-import com.example.slovoved.navigation.Screen
 
 @Preview(showBackground = true)
 @Composable
 fun DefinitionCardPreview()
 {
     val definition = "Android — это операционная система для мобильных устройств, разработанная компанией Google. Она основана на ядре Linux и предоставляет пользователям богатый набор приложений, инструментов и сервисов для создания, развития и распространения мобильных приложений."
-    DefinitionCard(definition=definition, bookmarkIsActive = false)
+    //DefinitionCard(definition=definition, bookmarkIsActive = false)
 }
 
 @Composable
-fun DefinitionCard(definition: String, bookmarkIsActive: Boolean,navController: NavHostController?=null) {
+fun DefinitionCard(definition: String, bookmarkIsActive: Boolean, openFullDefinition: ()->Unit) {
 
     val colors = listOf(
         Color(0xFF8B4513), // Saddle Brown (коричневый, напоминающий древесину)
@@ -68,7 +66,7 @@ fun DefinitionCard(definition: String, bookmarkIsActive: Boolean,navController: 
         Row(modifier = Modifier
             .weight(1f)
             .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(bottomEnd = 8.dp))
-            .clickable(onClick = { navController?.navigate(Screen.Definition.route) })){
+            .clickable(onClick = { openFullDefinition() })){
             Text(text = definition,
                 style = textStyle,
                 maxLines = 3,

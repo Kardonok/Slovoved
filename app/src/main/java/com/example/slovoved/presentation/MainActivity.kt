@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.slovoved.navigation.Screen
 import com.example.slovoved.presentation.bookmarks_module.components.BookmarksModule
 import com.example.slovoved.presentation.definition_module.components.DefinitionModule
+import com.example.slovoved.presentation.search_module.SearchViewModel
 import com.example.slovoved.presentation.search_module.components.SearchModule
 import com.example.slovoved.presentation.ui.theme.SlovovedTheme
 
@@ -46,19 +48,19 @@ class MainActivity : ComponentActivity() {
                 )
 
                 val navController = rememberNavController()
+                val searchViewModel: SearchViewModel = viewModel()
 
                 NavHost(navController= navController, startDestination = Screen.Search.route)
                 {
                     composable(route= Screen.Search.route) {
-                        SearchModule(definitionList=definitionList,navController = navController)
+                        SearchModule(searchViewModel,navController = navController)
                     }
                     composable(route=Screen.Bookmarks.route){
                         BookmarksModule(definitionList=definitionList,navController = navController)
                     }
                     composable(route=Screen.Definition.route){
-                        DefinitionModule(word="Android",definition=definition, bookmarkIsActive = true,navController = navController)
+                        DefinitionModule(searchViewModel, bookmarkIsActive = true,navController = navController)
                     }
-
                 }
             }
         }

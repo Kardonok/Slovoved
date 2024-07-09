@@ -73,7 +73,7 @@ fun BookmarksModule(definitionList: Array<String>,navController: NavHostControll
                 modifier = Modifier.padding(padding),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(definitionList) { definition ->
-                    DefinitionCard(definition = definition, bookmarkIsActive = false, navController = navController)
+                    DefinitionCard(definition = definition, bookmarkIsActive = false, openFullDefinition = { })
                 }
             }
         }
@@ -94,6 +94,6 @@ fun SearchDefinitionsBar(navController: NavHostController?=null){
                     isPoppingBackStack=true
                     navController?.popBackStack()} })
         )
-        CustomTextField(title = R.string.search_for_definitions)
+        CustomTextField(word = "", changeSearchingWord = { },title = R.string.search_for_definitions)
     }
 }

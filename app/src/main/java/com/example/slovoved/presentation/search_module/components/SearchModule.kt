@@ -1,20 +1,34 @@
 package com.example.slovoved.presentation.search_module.components
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,14 +36,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.slovoved.R
 import com.example.slovoved.navigation.Screen
+import com.example.slovoved.presentation.search_module.Search
+import com.example.slovoved.presentation.search_module.SearchStatus
+import com.example.slovoved.presentation.search_module.SearchViewModel
 import com.example.slovoved.presentation.universal_components.CustomTextField
 import com.example.slovoved.presentation.universal_components.DefinitionCard
+import com.example.slovoved.presentation.universal_components.textStyle
+import kotlinx.coroutines.delay
 
 @Preview(showBackground = true)
 @Composable
 fun SearchBarPreview()
 {
-    SearchBar()
+   //SearchBar()
 }
 
 @Preview(showBackground = true)
@@ -56,37 +75,94 @@ fun SearchModulePreview() {
         "Android Jetpack — это набор библиотек и инструментов, предоставляемых Google, которые помогают разработчикам создавать более качественные, надежные и современные приложения Android. Он включает в себя такие библиотеки, как Lifecycle, Navigation, Room и другие.",
         "Kotlin — это статически типизированный язык программирования, разработанный компанией JetBrains. Он предоставляет более высокую производительность, более безопасный код и более удобный синтаксис, чем Java. Kotlin поддерживается как основной язык для разработки приложений под Android."
     )
-    SearchModule(definitionList = definitionList)
+    //SearchModule()
 }
 
 
 
 
 @Composable
-fun SearchModule(definitionList: Array<String>,navController: NavHostController?=null) {
-    Scaffold(bottomBar = { SearchBar(navController) },
-        content = {padding->
-        LazyColumn(contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.padding(padding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(definitionList) { definition ->
-                DefinitionCard(definition = definition, bookmarkIsActive = false, navController = navController)
-                }
+fun SearchModule(searchViewModel: SearchViewModel, navController: NavHostController?=null) {
+
+    val searchState by searchViewModel.searchState.collectAsState()
+
+    Scaffold(bottomBar = { SearchBar(searchState = searchState, searchViewModel = searchViewModel,navController) },
+        content = { padding ->
+            when (searchState.searchStatus) {
+                is SearchStatus.Success -> SuccessScreen(searchState = searchState,searchViewModel = searchViewModel,modifier = Modifier.padding(padding), navController = navController)
+                is SearchStatus.Error -> ErrorScreen(modifier = Modifier.padding(padding))
+                is SearchStatus.Loading -> LoadingScreen(searchState = searchState,modifier = Modifier.padding(padding))
+                is SearchStatus.Waiting -> WaitingScreen(modifier = Modifier.padding(padding))
             }
         }
     )
 }
 
+@Composable
+fun SuccessScreen(searchState: Search, searchViewModel: SearchViewModel, modifier: Modifier = Modifier, navController: NavHostController?=null)
+{
+    LazyColumn(contentPadding = PaddingValues(16.dp),
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        itemsIndexed(searchState.definitionList) {index, definition ->
+            DefinitionCard(definition = definition,
+                bookmarkIsActive = false,
+                openFullDefinition = { searchViewModel.changeDefinitionIndex(index=index)
+                navController?.navigate(Screen.Definition.route)})
+        }
+    }
+}
 
 @Composable
-fun SearchBar(navController: NavHostController?=null){
-    Row(modifier = Modifier.fillMaxWidth().height(80.dp).background(color = Color(0xFF4B4B4B))) {
+fun LoadingScreen(searchState: Search, modifier: Modifier = Modifier) {
+    var rotation by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(Unit) {
+        while (searchState.searchStatus == SearchStatus.Loading) {
+            delay(80)
+            rotation += 45f
+            if (rotation >= 360f) {
+                rotation = 0f
+            }
+        }
+    }
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Image(
+            painter = painterResource(id = R.drawable.loading),
+            contentDescription = "Загрузка",
+            modifier = Modifier.rotate(rotation)
+        )
+    }
+}
+
+@Composable
+fun ErrorScreen(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Определений не найдено", style = textStyle)
+    }
+}
+
+@Composable
+fun WaitingScreen(modifier: Modifier = Modifier)
+{
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "Введите запрос", style = textStyle)
+    }
+}
+
+@Composable
+fun SearchBar(searchState: Search,searchViewModel: SearchViewModel,navController: NavHostController?=null){
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(80.dp)
+        .background(color = Color(0xFF4B4B4B))) {
         Image(painter = painterResource(id = R.drawable.active_bookmark),
             contentDescription = "go to bookmarks",
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
                 .size(32.dp)
                 .clickable(onClick = { navController?.navigate(Screen.Bookmarks.route) })
         )
-        CustomTextField(title = R.string.search)
+        CustomTextField(title = R.string.search, changeSearchingWord = searchViewModel::changeQueryWord, word = searchState.word)
     }
 }

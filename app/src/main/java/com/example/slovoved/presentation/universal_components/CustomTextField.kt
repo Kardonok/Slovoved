@@ -15,10 +15,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,13 +40,11 @@ val textStyle = TextStyle(
 @Preview(showBackground = true)
 @Composable
 fun CustomTextFieldPreview(){
-    CustomTextField(R.string.search)
+    //CustomTextField(R.string.search)
 }
 
 @Composable
-fun CustomTextField(@StringRes title: Int) {
-    var text by remember { mutableStateOf("") }
-
+fun CustomTextField(@StringRes title: Int, changeSearchingWord:(String)->Unit, word: String = "") {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -70,12 +64,12 @@ fun CustomTextField(@StringRes title: Int) {
             Spacer(modifier = Modifier.width(8.dp))
             BasicTextField(
                 singleLine = true,
-                value = text,
-                onValueChange = { text = it },
+                value = word,
+                onValueChange = {newWord -> changeSearchingWord(newWord) },
                 modifier = Modifier.weight(1f),
                 textStyle = textStyle,
             )
-            if (text.isEmpty()) {
+            if (word.isEmpty()) {
                 Text(
                     text = stringResource(id = title),
                     style = textStyle,
